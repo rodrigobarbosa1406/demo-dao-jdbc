@@ -4,7 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import db.DB;
 import db.DbException;
@@ -79,6 +82,46 @@ public class VendedorDaoJDBC implements VendedorDao {
 	public List<Vendedor> buscarTudo() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public List<Vendedor> buscarPorDepartamento(Departamento departamento) {
+		PreparedStatement stBuscaPorDepto = null;
+		ResultSet rsBuscaPorDepto = null;
+		
+		try {
+			stBuscaPorDepto = conn.prepareStatement(
+						"SELECT seller.*,department.Name as DepName "
+								+ "FROM seller "
+								+ "INNER JOIN department "
+								+ "ON seller.DepartmentId = department.Id "
+								+ "WHERE DepartmentId = ? "
+								+ "ORDER BY Name");
+			
+			stBuscaPorDepto.setInt(1, departamento.getId());
+			rsBuscaPorDepto = stBuscaPorDepto.executeQuery();
+			
+			List<Vendedor> lstVendedor = new ArrayList<>();
+			Map<Integer, Departamento> mapDepto = new HashMap<>();
+			
+			while (rsBuscaPorDepto.next()) {
+				Departamento deptoMap = mapDepto.get(rsBuscaPorDepto.getInt("DepartmentId"));
+				
+				if (deptoMap == null) {
+					deptoMap = instanciarDepartamento(rsBuscaPorDepto);
+					mapDepto.put(rsBuscaPorDepto.getInt("DepartmentId"), deptoMap);
+				}
+				
+				lstVendedor.add(instanciarVendedor(rsBuscaPorDepto, deptoMap));
+			}
+			
+			return lstVendedor;
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(stBuscaPorDepto);
+			DB.closeResultSet(rsBuscaPorDepto);
+		}
 	}
 
 }
