@@ -40,31 +40,39 @@ public class VendedorDaoJDBC implements VendedorDao {
 
 	@Override
 	public Vendedor buscarPorId(Integer id) {
-		PreparedStatement st = null;
-		ResultSet rs = null;
+		PreparedStatement stBuscaPorId = null;
+		ResultSet rsBuscaPorId = null;
 		
 		try {
-			st = conn.prepareStatement(
+			stBuscaPorId = conn.prepareStatement(
 						"SELECT seller.*, department.Name as DepName "
 								+ "FROM seller "
-								+ "INNER JOIN deparment "
+								+ "INNER JOIN department "
 								+ "ON seller.DepartmentId = department.Id "
 								+ "WHERE seller.id = ?");
 			
-			st.setInt(1, id);
-			rs = st.executeQuery();
+			stBuscaPorId.setInt(1, id);
+			rsBuscaPorId = stBuscaPorId.executeQuery();
 			
-			if (rs.next()) {
-				return new Vendedor(rs.getInt("Id"), rs.getString("Name"), rs.getString("Email"), rs.getDate("BirthDate"), rs.getDouble("BaseSalary"), new Departamento(rs.getInt("DepartmentId"), rs.getString("DepName")));
+			if (rsBuscaPorId.next()) {
+				return instanciarVendedor(rsBuscaPorId, instanciarDepartamento(rsBuscaPorId));
 			}
 			
 			return null;
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
 		} finally {
-			DB.closeStatement(st);
-			DB.closeResultSet(rs);
+			DB.closeStatement(stBuscaPorId);
+			DB.closeResultSet(rsBuscaPorId);
 		}
+	}
+
+	private Vendedor instanciarVendedor(ResultSet rsBuscaPorId, Departamento departamento) throws SQLException {
+		return new Vendedor(rsBuscaPorId.getInt("Id"), rsBuscaPorId.getString("Name"), rsBuscaPorId.getString("Email"), rsBuscaPorId.getDate("BirthDate"), rsBuscaPorId.getDouble("BaseSalary"), departamento);
+	}
+
+	private Departamento instanciarDepartamento(ResultSet rsBuscaPorId) throws SQLException {
+		return new Departamento(rsBuscaPorId.getInt("DepartmentId"), rsBuscaPorId.getString("DepName"));
 	}
 
 	@Override
