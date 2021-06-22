@@ -85,13 +85,23 @@ public class VendedorDaoJDBC implements VendedorDao {
 		} finally {
 			DB.closeStatement(stAtualizar);
 		}
-		
 	}
 
 	@Override
 	public void excluirPorId(Integer id) {
-		// TODO Auto-generated method stub
+		PreparedStatement stExcluir = null;
 		
+		try {
+			stExcluir = conn.prepareStatement("DELETE FROM seller WHERE Id = ?");
+			
+			stExcluir.setInt(1, id);
+			
+			stExcluir.executeUpdate();
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(stExcluir);
+		}
 	}
 
 	@Override

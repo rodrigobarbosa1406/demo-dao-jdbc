@@ -2,6 +2,7 @@ package application;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 import model.dao.FabricaDao;
 import model.dao.VendedorDao;
@@ -11,6 +12,7 @@ import model.entities.Vendedor;
 public class Program {
 
 	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
 		VendedorDao vendedorDao = FabricaDao.criarVendedorDao();
 		
 		System.out.println("=== Teste 1: vendedor buscarPorId ===");
@@ -42,6 +44,13 @@ public class Program {
 		vendedor.setNome("Martha Waine");
 		vendedorDao.atualizar(vendedor);
 		System.out.println("Atualização concluída!");
+		
+		System.out.println("\n=== Teste 6: vendedor excluirPorId ===");
+		System.out.println("Informe um id para excluir: ");
+		int id = sc.nextInt();
+		vendedorDao.excluirPorId(id);
+		System.out.println("Exclusão concluída!");
+		
+		sc.close();
 	}
-
 }
